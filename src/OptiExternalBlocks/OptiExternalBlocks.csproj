@@ -10,8 +10,8 @@
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Optimizely;Graph</PackageTags>
-		<RepositoryUrl>tbc</RepositoryUrl>
-		<PackageProjectUrl>tbc</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/adayinthelifeofapro/OptiExternalBlocks</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/adayinthelifeofapro/OptiExternalBlocks</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Copyright>Graham Carr 2026</Copyright>
 		<Description>An Optimizely CMS 12+ plugin that exposes Graph External Content in the Optimizely CMS Interface, allowing editors to use external content natively inside Content Areas.</Description>
