@@ -1,0 +1,200 @@
+@using Microsoft.AspNetCore.Components.Forms
+@inherits TemplateManagementComponentBase
+
+<div class="epi-contentArea">
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="epi-notificationbar epi-notificationbar--success">
+            @SuccessMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="epi-notificationbar epi-notificationbar--danger">
+            @ErrorMessage
+        </div>
+    }
+
+    @if (IsLoading)
+    {
+        <div class="epi-loader-container">
+            <span class="epi-loader-small"></span>
+            <span>Loading...</span>
+        </div>
+    }
+    else if (IsEditing)
+    {
+        <section class="epi-card">
+            <h2 class="epi-h2">@(EditModel.Id == Guid.Empty ? "Create Template" : "Edit Template")</h2>
+
+            <EditForm Model="EditModel" OnValidSubmit="HandleSaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="epi-form">
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Content Type Name *</label>
+                        <InputText Value="@EditModel.ContentTypeName" ValueChanged="@((string v) => EditModel.ContentTypeName = v)" ValueExpression="@(() => EditModel.ContentTypeName)" class="epi-textbox" placeholder="e.g., Article, Product, News" />
+                        <ValidationMessage For="@(() => EditModel.ContentTypeName)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Display Name *</label>
+                        <InputText Value="@EditModel.DisplayName" ValueChanged="@((string v) => EditModel.DisplayName = v)" ValueExpression="@(() => EditModel.DisplayName)" class="epi-textbox" placeholder="Display name for editors" />
+                        <ValidationMessage For="@(() => EditModel.DisplayName)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Description</label>
+                        <InputTextArea Value="@EditModel.Description" ValueChanged="@((string? v) => EditModel.Description = v)" ValueExpression="@(() => EditModel.Description)" class="epi-textbox" rows="2" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Icon Class</label>
+                        <InputText Value="@EditModel.IconClass" ValueChanged="@((string v) => EditModel.IconClass = v)" ValueExpression="@(() => EditModel.IconClass)" class="epi-textbox" placeholder="epi-iconDocument" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Sort Order</label>
+                        <InputNumber Value="@EditModel.SortOrder" ValueChanged="@((int v) => EditModel.SortOrder = v)" ValueExpression="@(() => EditModel.SortOrder)" class="epi-textbox" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-checkbox-label">
+                            <InputCheckbox Value="@EditModel.IsActive" ValueChanged="@((bool v) => EditModel.IsActive = v)" ValueExpression="@(() => EditModel.IsActive)" />
+                            Active
+                        </label>
+                    </div>
+
+                    <h3 class="epi-h3" style="margin-top: 1.5rem;">Field Mapping (Optional)</h3>
+                    <p class="epi-muted" style="margin-bottom: 1rem;">Configure which fields from the external data to use for title and thumbnail. Leave empty to use automatic detection. Supports nested paths like "metadata.title".</p>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Title Field Name</label>
+                        <InputText Value="@EditModel.TitleFieldName" ValueChanged="@((string? v) => EditModel.TitleFieldName = v)" ValueExpression="@(() => EditModel.TitleFieldName)" class="epi-textbox" placeholder="e.g., headline, metadata.title" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Thumbnail Field Name</label>
+                        <InputText Value="@EditModel.ThumbnailFieldName" ValueChanged="@((string? v) => EditModel.ThumbnailFieldName = v)" ValueExpression="@(() => EditModel.ThumbnailFieldName)" class="epi-textbox" placeholder="e.g., featuredImage.url, hero.src" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">GraphQL Query *</label>
+                        <InputTextArea Value="@EditModel.GraphQLQuery" ValueChanged="@((string v) => EditModel.GraphQLQuery = v)" ValueExpression="@(() => EditModel.GraphQLQuery)" class="epi-textbox epi-code-editor" rows="8" placeholder="query GetContent($searchText: String, $limit: Int, $skip: Int) { ... }" />
+                        <ValidationMessage For="@(() => EditModel.GraphQLQuery)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">GraphQL Variables (JSON)</label>
+                        <InputTextArea Value="@EditModel.GraphQLVariables" ValueChanged="@((string? v) => EditModel.GraphQLVariables = v)" ValueExpression="@(() => EditModel.GraphQLVariables)" class="epi-textbox epi-code-editor" rows="4" placeholder='{"locale": "en"}' />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Edit Mode Template (Mustache) *</label>
+                        <InputTextArea Value="@EditModel.EditModeTemplate" ValueChanged="@((string v) => EditModel.EditModeTemplate = v)" ValueExpression="@(() => EditModel.EditModeTemplate)" class="epi-textbox epi-code-editor" rows="8" placeholder="<div class='external-content-preview'>{{title}}</div>" />
+                        <ValidationMessage For="@(() => EditModel.EditModeTemplate)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Render Template (Mustache) *</label>
+                        <InputTextArea Value="@EditModel.RenderTemplate" ValueChanged="@((string v) => EditModel.RenderTemplate = v)" ValueExpression="@(() => EditModel.RenderTemplate)" class="epi-textbox epi-code-editor" rows="8" placeholder="<article>{{title}}</article>" />
+                        <ValidationMessage For="@(() => EditModel.RenderTemplate)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-actions">
+                        <button type="submit" class="epi-button epi-button--primary" disabled="@IsSaving">
+                            @(IsSaving ? "Saving..." : "Save")
+                        </button>
+                        <button type="button" class="epi-button epi-button--secondary" @onclick="CancelEdit">
+                            Cancel
+                        </button>
+                        @if (!string.IsNullOrEmpty(EditModel.EditModeTemplate))
+                        {
+                            <button type="button" class="epi-button" @onclick="ShowPreviewAsync">
+                                Preview Template
+                            </button>
+                        }
+                    </div>
+                </div>
+            </EditForm>
+        </section>
+
+        @if (ShowPreview)
+        {
+            <section class="epi-card">
+                <h2 class="epi-h2">Template Preview</h2>
+                <div class="epi-form-row">
+                    <label class="epi-form-label">Sample Data (JSON)</label>
+                    <InputTextArea Value="@PreviewData" ValueChanged="@((string v) => PreviewData = v)" ValueExpression="@(() => PreviewData)" class="epi-textbox epi-code-editor" rows="4" />
+                    <button type="button" class="epi-button" @onclick="RefreshPreviewAsync">Refresh Preview</button>
+                </div>
+                <div class="epi-preview-container">
+                    @((MarkupString)PreviewHtml)
+                </div>
+            </section>
+        }
+    }
+    else
+    {
+        <section class="epi-card">
+            <div class="epi-card-header">
+                <h2 class="epi-h2">External Content Templates</h2>
+                <button class="epi-button epi-button--primary" @onclick="CreateNew">
+                    <span class="epi-iconPlus"></span> Create Template
+                </button>
+            </div>
+
+            @if (Templates.Count == 0)
+            {
+                <div class="epi-empty-state">
+                    <p>No templates configured yet.</p>
+                    <p>Create a template to enable external content in Content Areas.</p>
+                </div>
+            }
+            else
+            {
+                <table class="epi-table">
+                    <thead>
+                        <tr>
+                            <th>Display Name</th>
+                            <th>Content Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var template in Templates)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="@template.IconClass"></span>
+                                    @template.DisplayName
+                                </td>
+                                <td>@template.ContentTypeName</td>
+                                <td>
+                                    @if (template.IsActive)
+                                    {
+                                        <span class="epi-badge epi-badge--success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="epi-badge epi-badge--secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td class="epi-table-actions">
+                                    <button class="epi-button epi-button--small" @onclick="() => EditTemplate(template)">
+                                        Edit
+                                    </button>
+                                    <button class="epi-button epi-button--small epi-button--danger" @onclick="() => DeleteTemplateAsync(template.Id)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+    }
+</div>

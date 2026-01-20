@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln add:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dir:*)",
+      "Bash(dotnet ef database:*)",
+      "Bash(cmd /c \"cd /d D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks && dotnet ef database update\")",
+      "Bash(cmd /c \"D: && cd D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks && dotnet ef database update\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks''; dotnet ef database update\")",
+      "Bash(powershell -Command \"dotnet tool install --global dotnet-ef\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks''; dotnet ef database update --framework net8.0\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks''; dotnet add package Microsoft.EntityFrameworkCore.Design\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\src\\\\OptiExternalBlocks''; dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.11\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\Sample\\\\SampleCms''; dotnet build\")",
+      "Bash(powershell -Command \"Set-Location ''D:\\\\Projects\\\\Optimizely\\\\OptiExternalBlocks\\\\Sample\\\\SampleCms''; dotnet clean; dotnet build\")",
+      "Bash(powershell -Command:*)",
+      "Bash(ls:*)",
+      "Bash(unzip:*)",
+      "Bash(find:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(dotnet clean:*)",
+      "WebFetch(domain:world.optimizely.com)",
+      "WebFetch(domain:docs.developers.optimizely.com)",
+      "Bash(findstr:*)"
+    ]
+  }
+}

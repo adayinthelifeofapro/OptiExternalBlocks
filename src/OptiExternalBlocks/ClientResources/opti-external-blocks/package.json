@@ -1,0 +1,6 @@
+{
+    "name": "opti-external-blocks",
+    "main": "ExternalContentComponent",
+    "description": "External Content Blocks for Optimizely CMS",
+    "dependencies": ["epi-cms"]
+}

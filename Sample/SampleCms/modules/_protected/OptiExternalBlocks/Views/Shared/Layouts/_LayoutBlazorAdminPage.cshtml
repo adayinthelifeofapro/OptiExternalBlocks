@@ -1,0 +1,293 @@
+@using EPiServer.Framework.Web.Resources
+@using EPiServer.Shell.Navigation
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewData["Title"] - External Content Blocks</title>
+
+    <!-- Shell -->
+    @ClientResources.RenderResources("ShellCore")
+
+    <!-- LightTheme -->
+    @ClientResources.RenderResources("ShellCoreLightTheme")
+
+    <style>
+        /* Layout */
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1200px;
+        }
+
+        /* Cards */
+        .epi-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .epi-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Tables */
+        .epi-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .epi-table th,
+        .epi-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .epi-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .epi-table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Forms */
+        .epi-form {
+            max-width: 800px;
+        }
+
+        .epi-form-row {
+            margin-bottom: 1rem;
+        }
+
+        .epi-form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .epi-form-help {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .epi-form-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .epi-form-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .epi-textbox {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .epi-textbox:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+        }
+
+        .epi-code-editor {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        /* Buttons */
+        .epi-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .epi-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .epi-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .epi-button--primary {
+            background-color: #0078d4;
+            border-color: #0078d4;
+            color: white;
+        }
+
+        .epi-button--primary:hover {
+            background-color: #006cc1;
+        }
+
+        .epi-button--secondary {
+            background-color: #f5f5f5;
+        }
+
+        .epi-button--danger {
+            color: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        .epi-button--danger:hover {
+            background-color: #ffebee;
+        }
+
+        .epi-button--small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Badges */
+        .epi-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .epi-badge--success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .epi-badge--secondary {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .epi-badge--primary {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        /* Notifications */
+        .epi-notificationbar {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .epi-notificationbar--success {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
+        }
+
+        .epi-notificationbar--danger {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+            color: #c62828;
+        }
+
+        /* Loader */
+        .epi-loader-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 2rem;
+        }
+
+        /* Empty state */
+        .epi-empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        /* Preview */
+        .epi-preview-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        /* Validation */
+        .epi-validation-error {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Error display */
+        .epi-error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ef9a9a;
+        }
+
+        /* Lists */
+        .epi-list {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .epi-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code blocks */
+        pre {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.875rem;
+            background-color: #f5f5f5;
+            padding: 0.125rem 0.25rem;
+            border-radius: 2px;
+        }
+
+        pre code {
+            padding: 0;
+        }
+    </style>
+
+    <base href="~/" />
+</head>
+<body>
+    @Html.AntiForgeryToken()
+    @Html.CreatePlatformNavigationMenu()
+    <div @Html.ApplyPlatformNavigation() style="padding: 1rem; background: white;">
+        <main>
+            @RenderBody()
+        </main>
+    </div>
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

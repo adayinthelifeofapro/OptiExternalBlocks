@@ -1,0 +1,57 @@
+@{
+    Layout = "~/Views/Shared/Layouts/_LayoutBlazorAdminPage.cshtml";
+    ViewData["Title"] = "About";
+}
+
+<div class="epi-contentArea">
+    <section class="epi-card">
+        <h2 class="epi-h2">External Content Blocks</h2>
+        <p>Version 1.0.0</p>
+        <p>
+            This plugin enables editors to use external content from the Optimizely Graph API
+            natively within Content Areas. Administrators can configure Mustache templates
+            for each external content type.
+        </p>
+    </section>
+
+    <section class="epi-card">
+        <h2 class="epi-h2">Features</h2>
+        <ul class="epi-list">
+            <li>Browse and select external content from the Graph API</li>
+            <li>Configure custom Mustache templates per content type</li>
+            <li>Preview templates with sample data</li>
+            <li>Separate templates for edit mode and public rendering</li>
+            <li>Support for multiple Graph API endpoints</li>
+        </ul>
+    </section>
+
+    <section class="epi-card">
+        <h2 class="epi-h2">Mustache Template Syntax</h2>
+        <p>Templates use the Mustache templating language. Available variables include:</p>
+        <ul class="epi-list">
+            <li><code>{{_id}}</code> - The external content ID</li>
+            <li><code>{{_title}}</code> - The content title</li>
+            <li><code>{{_thumbnail}}</code> - Thumbnail URL if available</li>
+            <li><code>{{_contentType}}</code> - The content type name</li>
+            <li><code>{{propertyName}}</code> - Any property from the Graph API response</li>
+        </ul>
+        <h3 class="epi-h3">Sections</h3>
+        <pre><code>{{#items}}
+  &lt;li&gt;{{name}}&lt;/li&gt;
+{{/items}}</code></pre>
+        <h3 class="epi-h3">Conditionals</h3>
+        <pre><code>{{#hasImage}}
+  &lt;img src="{{imageUrl}}" /&gt;
+{{/hasImage}}</code></pre>
+    </section>
+
+    <section class="epi-card">
+        <h2 class="epi-h2">Documentation</h2>
+        <p>
+            For more information, visit the
+            <a href="https://docs.developers.optimizely.com/content-graph" target="_blank" rel="noopener">
+                Optimizely Graph Documentation
+            </a>.
+        </p>
+    </section>
+</div>

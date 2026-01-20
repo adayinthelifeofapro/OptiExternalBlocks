@@ -1,0 +1,7 @@
+@{
+    Layout = "~/Views/Shared/Layouts/_LayoutBlazorAdminPage.cshtml";
+    ViewData["Title"] = "Template Configuration";
+}
+
+@(await Html.RenderComponentAsync<OptiExternalBlocks.Features.Templates.TemplateManagementComponent>(
+    Microsoft.AspNetCore.Mvc.Rendering.RenderMode.Server))

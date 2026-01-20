@@ -1,0 +1,364 @@
+define([
+    "dojo/_base/declare",
+    "dojo/_base/lang",
+    "dojo/on",
+    "dojo/dom-construct",
+    "dojo/dom-class",
+    "dojo/request/xhr",
+    "dijit/_WidgetBase",
+    "dijit/_TemplatedMixin",
+    "dijit/_WidgetsInTemplateMixin",
+    "epi/shell/widget/_ModelBindingMixin",
+    "epi-cms/component/ContentQueryGrid",
+    "epi/i18n!epi/cms/nls/episerver.cms.components.media"
+], function (
+    declare,
+    lang,
+    on,
+    domConstruct,
+    domClass,
+    xhr,
+    _WidgetBase,
+    _TemplatedMixin,
+    _WidgetsInTemplateMixin,
+    _ModelBindingMixin,
+    ContentQueryGrid,
+    resources
+) {
+    return declare("opti-external-blocks.ExternalContentTab", [_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, _ModelBindingMixin], {
+
+        templateString: '<div class="external-content-tab">' +
+            '<div class="external-content-header">' +
+                '<h3>External Content Blocks</h3>' +
+            '</div>' +
+            '<div class="external-content-type-selector" data-dojo-attach-point="typeSelectorNode"></div>' +
+            '<div class="external-content-search">' +
+                '<input type="text" data-dojo-attach-point="searchInput" placeholder="Search external content..." class="epi-textbox" />' +
+                '<button data-dojo-attach-point="searchButton" class="epi-button">Search</button>' +
+            '</div>' +
+            '<div class="external-content-results" data-dojo-attach-point="resultsNode"></div>' +
+            '<div class="external-content-pagination" data-dojo-attach-point="paginationNode"></div>' +
+            '<div class="external-content-preview" data-dojo-attach-point="previewNode"></div>' +
+        '</div>',
+
+        baseClass: "external-content-tab",
+
+        apiUrl: "/api/optiexternalblocks",
+
+        templates: [],
+        selectedTemplateId: null,
+        searchResults: [],
+        currentPage: 1,
+        pageSize: 20,
+        totalCount: 0,
+
+        postCreate: function () {
+            this.inherited(arguments);
+            this._loadTemplates();
+            this._setupEventHandlers();
+        },
+
+        _setupEventHandlers: function () {
+            var self = this;
+
+            on(this.searchButton, "click", function () {
+                self._performSearch();
+            });
+
+            on(this.searchInput, "keypress", function (e) {
+                if (e.keyCode === 13) {
+                    self._performSearch();
+                }
+            });
+        },
+
+        _loadTemplates: function () {
+            var self = this;
+
+            xhr(this.apiUrl + "/templates", {
+                handleAs: "json",
+                headers: { "Accept": "application/json" }
+            }).then(function (data) {
+                self.templates = data;
+                self._renderTypeSelector();
+            }, function (err) {
+                console.error("Error loading templates:", err);
+                self._showError("Failed to load content types");
+            });
+        },
+
+        _renderTypeSelector: function () {
+            var self = this;
+            domConstruct.empty(this.typeSelectorNode);
+
+            if (this.templates.length === 0) {
+                domConstruct.create("p", {
+                    innerHTML: "No external content types configured.",
+                    className: "external-content-empty"
+                }, this.typeSelectorNode);
+                return;
+            }
+
+            var select = domConstruct.create("select", {
+                className: "epi-select external-content-type-select"
+            }, this.typeSelectorNode);
+
+            domConstruct.create("option", {
+                value: "",
+                innerHTML: "Select content type..."
+            }, select);
+
+            this.templates.forEach(function (template) {
+                domConstruct.create("option", {
+                    value: template.id,
+                    innerHTML: template.displayName
+                }, select);
+            });
+
+            on(select, "change", function (e) {
+                self.selectedTemplateId = e.target.value || null;
+                self.currentPage = 1;
+                if (self.selectedTemplateId) {
+                    self._performSearch();
+                } else {
+                    self._clearResults();
+                }
+            });
+        },
+
+        _performSearch: function () {
+            if (!this.selectedTemplateId) {
+                return;
+            }
+
+            var self = this;
+            var query = this.searchInput.value || "";
+
+            var url = this.apiUrl + "/search?" +
+                "templateId=" + encodeURIComponent(this.selectedTemplateId) +
+                "&query=" + encodeURIComponent(query) +
+                "&page=" + this.currentPage +
+                "&pageSize=" + this.pageSize;
+
+            this._showLoading();
+
+            xhr(url, {
+                handleAs: "json",
+                headers: { "Accept": "application/json" }
+            }).then(function (data) {
+                self.searchResults = data.items;
+                self.totalCount = data.totalCount;
+                self._renderResults();
+                self._renderPagination(data.hasMorePages);
+            }, function (err) {
+                console.error("Error searching content:", err);
+                self._showError("Failed to search content");
+            });
+        },
+
+        _showLoading: function () {
+            domConstruct.empty(this.resultsNode);
+            domConstruct.create("div", {
+                className: "external-content-loading",
+                innerHTML: '<span class="epi-loader-small"></span> Loading...'
+            }, this.resultsNode);
+        },
+
+        _renderResults: function () {
+            var self = this;
+            domConstruct.empty(this.resultsNode);
+
+            if (this.searchResults.length === 0) {
+                domConstruct.create("div", {
+                    className: "external-content-empty",
+                    innerHTML: "No content found."
+                }, this.resultsNode);
+                return;
+            }
+
+            var list = domConstruct.create("ul", {
+                className: "external-content-list"
+            }, this.resultsNode);
+
+            this.searchResults.forEach(function (item) {
+                var li = domConstruct.create("li", {
+                    className: "external-content-item",
+                    "data-id": item.id,
+                    "data-template-id": self.selectedTemplateId
+                }, list);
+
+                if (item.thumbnailUrl) {
+                    domConstruct.create("img", {
+                        src: item.thumbnailUrl,
+                        alt: item.title,
+                        className: "external-content-thumb"
+                    }, li);
+                } else {
+                    domConstruct.create("span", {
+                        className: "external-content-icon epi-iconDocument"
+                    }, li);
+                }
+
+                domConstruct.create("span", {
+                    innerHTML: item.title,
+                    className: "external-content-title"
+                }, li);
+
+                // Make draggable for content area
+                li.draggable = true;
+
+                on(li, "dragstart", function (e) {
+                    e.dataTransfer.setData("application/x-episerver-contentreference", JSON.stringify({
+                        type: "ExternalContent",
+                        id: item.id,
+                        templateId: self.selectedTemplateId,
+                        title: item.title
+                    }));
+                    e.dataTransfer.effectAllowed = "copy";
+                });
+
+                on(li, "click", function () {
+                    self._selectItem(item);
+                });
+
+                on(li, "dblclick", function () {
+                    self._insertItem(item);
+                });
+            });
+        },
+
+        _renderPagination: function (hasMore) {
+            var self = this;
+            domConstruct.empty(this.paginationNode);
+
+            var paginationContainer = domConstruct.create("div", {
+                className: "external-content-pagination-controls"
+            }, this.paginationNode);
+
+            if (this.currentPage > 1) {
+                var prevBtn = domConstruct.create("button", {
+                    innerHTML: "Previous",
+                    className: "epi-button epi-button--small"
+                }, paginationContainer);
+
+                on(prevBtn, "click", function () {
+                    self.currentPage--;
+                    self._performSearch();
+                });
+            }
+
+            domConstruct.create("span", {
+                innerHTML: "Page " + this.currentPage + " (" + this.totalCount + " total)",
+                className: "external-content-page-info"
+            }, paginationContainer);
+
+            if (hasMore) {
+                var nextBtn = domConstruct.create("button", {
+                    innerHTML: "Next",
+                    className: "epi-button epi-button--small"
+                }, paginationContainer);
+
+                on(nextBtn, "click", function () {
+                    self.currentPage++;
+                    self._performSearch();
+                });
+            }
+        },
+
+        _selectItem: function (item) {
+            var self = this;
+
+            // Remove previous selection
+            var previousSelected = this.resultsNode.querySelector(".external-content-item--selected");
+            if (previousSelected) {
+                domClass.remove(previousSelected, "external-content-item--selected");
+            }
+
+            // Add selection to clicked item
+            var clickedItem = this.resultsNode.querySelector('[data-id="' + item.id + '"]');
+            if (clickedItem) {
+                domClass.add(clickedItem, "external-content-item--selected");
+            }
+
+            // Load preview
+            this._loadPreview(item);
+        },
+
+        _loadPreview: function (item) {
+            var self = this;
+            domConstruct.empty(this.previewNode);
+
+            domConstruct.create("div", {
+                className: "external-content-preview-loading",
+                innerHTML: "Loading preview..."
+            }, this.previewNode);
+
+            var url = this.apiUrl + "/preview/" + this.selectedTemplateId + "/" + encodeURIComponent(item.id);
+
+            xhr(url, {
+                handleAs: "json",
+                headers: { "Accept": "application/json" }
+            }).then(function (data) {
+                domConstruct.empty(self.previewNode);
+
+                domConstruct.create("h4", {
+                    innerHTML: data.title,
+                    className: "external-content-preview-title"
+                }, self.previewNode);
+
+                domConstruct.create("div", {
+                    innerHTML: data.html,
+                    className: "external-content-preview-content"
+                }, self.previewNode);
+
+                var insertBtn = domConstruct.create("button", {
+                    innerHTML: "Insert Content",
+                    className: "epi-button epi-button--primary"
+                }, self.previewNode);
+
+                on(insertBtn, "click", function () {
+                    self._insertItem(item);
+                });
+            }, function (err) {
+                domConstruct.empty(self.previewNode);
+                domConstruct.create("div", {
+                    innerHTML: "Failed to load preview",
+                    className: "external-content-error"
+                }, self.previewNode);
+            });
+        },
+
+        _insertItem: function (item) {
+            // Emit event for content area to pick up
+            this.emit("contentSelected", {
+                type: "ExternalContent",
+                id: item.id,
+                templateId: this.selectedTemplateId,
+                title: item.title
+            });
+
+            // Also try to use the Optimizely content system
+            if (this.model && this.model.set) {
+                this.model.set("selectedContent", {
+                    id: item.id,
+                    templateId: this.selectedTemplateId,
+                    title: item.title
+                });
+            }
+        },
+
+        _clearResults: function () {
+            domConstruct.empty(this.resultsNode);
+            domConstruct.empty(this.paginationNode);
+            domConstruct.empty(this.previewNode);
+        },
+
+        _showError: function (message) {
+            domConstruct.empty(this.resultsNode);
+            domConstruct.create("div", {
+                innerHTML: message,
+                className: "external-content-error"
+            }, this.resultsNode);
+        }
+    });
+});

@@ -1,0 +1,7 @@
+@{
+    Layout = "~/Views/Shared/Layouts/_LayoutBlazorAdminPage.cshtml";
+    ViewData["Title"] = "Endpoint Configuration";
+}
+
+@(await Html.RenderComponentAsync<OptiExternalBlocks.Features.Templates.EndpointManagementComponent>(
+    Microsoft.AspNetCore.Mvc.Rendering.RenderMode.Server))

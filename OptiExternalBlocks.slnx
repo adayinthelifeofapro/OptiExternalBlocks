@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Sample/">
+    <Project Path="Sample/SampleCms/SampleCms.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/OptiExternalBlocks.Tests/OptiExternalBlocks.Tests.csproj" />
+    <Project Path="src/OptiExternalBlocks/OptiExternalBlocks.csproj" />
+  </Folder>
+</Solution>

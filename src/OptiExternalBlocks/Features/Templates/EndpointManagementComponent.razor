@@ -1,0 +1,167 @@
+@using Microsoft.AspNetCore.Components.Forms
+@inherits EndpointManagementComponentBase
+
+<div class="epi-contentArea">
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="epi-notificationbar epi-notificationbar--success">
+            @SuccessMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="epi-notificationbar epi-notificationbar--danger">
+            @ErrorMessage
+        </div>
+    }
+
+    @if (IsLoading)
+    {
+        <div class="epi-loader-container">
+            <span class="epi-loader-small"></span>
+            <span>Loading...</span>
+        </div>
+    }
+    else if (IsEditing)
+    {
+        <section class="epi-card">
+            <h2 class="epi-h2">@(EditModel.Id == Guid.Empty ? "Create Endpoint" : "Edit Endpoint")</h2>
+
+            <EditForm Model="EditModel" OnValidSubmit="HandleSaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="epi-form">
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Name *</label>
+                        <InputText Value="@EditModel.Name" ValueChanged="@((string v) => EditModel.Name = v)" ValueExpression="@(() => EditModel.Name)" class="epi-textbox" placeholder="e.g., Production Graph API" />
+                        <ValidationMessage For="@(() => EditModel.Name)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Endpoint URL *</label>
+                        <InputText Value="@EditModel.EndpointUrl" ValueChanged="@((string v) => EditModel.EndpointUrl = v)" ValueExpression="@(() => EditModel.EndpointUrl)" class="epi-textbox" placeholder="https://cg.optimizely.com/content/v2" />
+                        <ValidationMessage For="@(() => EditModel.EndpointUrl)" class="epi-validation-error" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <h3 class="epi-h3">Authentication</h3>
+                        <p class="epi-form-help">Use Single Key OR App Key/Secret (not both)</p>
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">Single Key</label>
+                        <InputText Value="@EditModel.SingleKey" ValueChanged="@((string? v) => EditModel.SingleKey = v)" ValueExpression="@(() => EditModel.SingleKey)" class="epi-textbox" type="password" placeholder="Single key for authentication" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">App Key</label>
+                        <InputText Value="@EditModel.AppKey" ValueChanged="@((string? v) => EditModel.AppKey = v)" ValueExpression="@(() => EditModel.AppKey)" class="epi-textbox" placeholder="Application key" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-label">App Secret</label>
+                        <InputText Value="@EditModel.AppSecret" ValueChanged="@((string? v) => EditModel.AppSecret = v)" ValueExpression="@(() => EditModel.AppSecret)" class="epi-textbox" type="password" placeholder="Application secret" />
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-checkbox-label">
+                            <InputCheckbox Value="@EditModel.IsDefault" ValueChanged="@((bool v) => EditModel.IsDefault = v)" ValueExpression="@(() => EditModel.IsDefault)" />
+                            Default Endpoint
+                        </label>
+                    </div>
+
+                    <div class="epi-form-row">
+                        <label class="epi-form-checkbox-label">
+                            <InputCheckbox Value="@EditModel.IsActive" ValueChanged="@((bool v) => EditModel.IsActive = v)" ValueExpression="@(() => EditModel.IsActive)" />
+                            Active
+                        </label>
+                    </div>
+
+                    <div class="epi-form-actions">
+                        <button type="submit" class="epi-button epi-button--primary" disabled="@IsSaving">
+                            @(IsSaving ? "Saving..." : "Save")
+                        </button>
+                        <button type="button" class="epi-button epi-button--secondary" @onclick="CancelEdit">
+                            Cancel
+                        </button>
+                        <button type="button" class="epi-button" @onclick="TestConnectionAsync" disabled="@IsTesting">
+                            @(IsTesting ? "Testing..." : "Test Connection")
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </section>
+    }
+    else
+    {
+        <section class="epi-card">
+            <div class="epi-card-header">
+                <h2 class="epi-h2">Graph API Endpoints</h2>
+                <button class="epi-button epi-button--primary" @onclick="CreateNew">
+                    <span class="epi-iconPlus"></span> Create Endpoint
+                </button>
+            </div>
+
+            @if (Endpoints.Count == 0)
+            {
+                <div class="epi-empty-state">
+                    <p>No endpoints configured yet.</p>
+                    <p>Create an endpoint to connect to your Graph API.</p>
+                </div>
+            }
+            else
+            {
+                <table class="epi-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var endpoint in Endpoints)
+                        {
+                            <tr>
+                                <td>
+                                    @endpoint.Name
+                                    @if (endpoint.IsDefault)
+                                    {
+                                        <span class="epi-badge epi-badge--primary">Default</span>
+                                    }
+                                </td>
+                                <td>@endpoint.EndpointUrl</td>
+                                <td>
+                                    @if (endpoint.IsActive)
+                                    {
+                                        <span class="epi-badge epi-badge--success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="epi-badge epi-badge--secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td class="epi-table-actions">
+                                    <button class="epi-button epi-button--small" @onclick="() => EditEndpoint(endpoint)">
+                                        Edit
+                                    </button>
+                                    @if (!endpoint.IsDefault)
+                                    {
+                                        <button class="epi-button epi-button--small" @onclick="() => SetDefaultAsync(endpoint.Id)">
+                                            Set Default
+                                        </button>
+                                    }
+                                    <button class="epi-button epi-button--small epi-button--danger" @onclick="() => DeleteEndpointAsync(endpoint.Id)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+    }
+</div>

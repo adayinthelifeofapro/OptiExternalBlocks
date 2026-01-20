@@ -1,0 +1,73 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+		<Title>Opti External Blocks</Title>
+		<Version>1.0.0</Version>
+		<PackageReleaseNotes></PackageReleaseNotes>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Optimizely;Graph</PackageTags>
+		<RepositoryUrl>tbc</RepositoryUrl>
+		<PackageProjectUrl>tbc</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Copyright>Graham Carr 2026</Copyright>
+		<Description>An Optimizely CMS 12+ plugin that exposes Graph External Content in the Optimizely CMS Interface, allowing editors to use external content natively inside Content Areas.</Description>
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<FileVersion>1.0.0</FileVersion>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<Authors>Graham Carr</Authors>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="module.config">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles\module.config</PackagePath>
+		</None>
+		<None Include="msbuild\copyfiles.targets">
+			<Pack>true</Pack>
+			<PackagePath>build\$(MSBuildProjectName).targets</PackagePath>
+		</None>		
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="EPiServer.CMS.UI.Core" Version="[12.23.0, 13.0.0)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.6" />
+		<PackageReference Include="GraphQL.Client" Version="6.0.0" />
+		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.0.0" />
+		<PackageReference Include="Stubble.Core" Version="1.10.8" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="EPiServer.CMS.UI.Core" Version="[12.23.0, 13.0.0)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
+		<PackageReference Include="GraphQL.Client" Version="6.0.0" />
+		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.0.0" />
+		<PackageReference Include="Stubble.Core" Version="1.10.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="Views\**\*" CopyToOutputDirectory="Always" />
+		<Content Update="ClientResources\**\*" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+</Project>

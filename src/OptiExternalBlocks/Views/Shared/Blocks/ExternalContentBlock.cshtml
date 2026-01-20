@@ -1,0 +1,8 @@
+@model OptiExternalBlocks.Blocks.ExternalContentBlockViewModel
+
+@if (Model.HasContent || Model.IsEditMode)
+{
+    <div class="external-content-block @Model.CssClass">
+        @Html.Raw(Model.RenderedHtml)
+    </div>
+}
